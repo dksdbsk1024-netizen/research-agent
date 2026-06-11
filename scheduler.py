@@ -49,6 +49,7 @@ def run_pipeline():
         elapsed = time.time() - start
         if result.returncode == 0:
             logger.info(f"파이프라인 완료 ({elapsed:.0f}초)")
+            push_db_to_github()
         else:
             logger.error(f"파이프라인 실패 (종료코드: {result.returncode}, {elapsed:.0f}초)")
             if result.stderr:
@@ -56,6 +57,29 @@ def run_pipeline():
                     logger.error(f"  stderr: {line}")
     except Exception as e:
         logger.error(f"파이프라인 실행 오류: {e}")
+
+
+def push_db_to_github():
+    logger.info("=== GitHub 자동 푸시 시작 ===")
+    today = datetime.now().strftime("%Y-%m-%d %H:%M")
+    try:
+        cmds = [
+            ["git", "add", "data/quant_project.db"],
+            ["git", "commit", "-m", f"데이터 자동 갱신: {today}"],
+            ["git", "push"],
+        ]
+        for cmd in cmds:
+            r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+            if r.returncode != 0:
+                # commit은 변경사항 없으면 실패해도 정상
+                if "nothing to commit" in r.stdout + r.stderr:
+                    logger.info("변경사항 없음 — 푸시 건너뜀")
+                    return
+                logger.error(f"git 오류 ({' '.join(cmd)}): {r.stderr.strip()}")
+                return
+        logger.info(f"GitHub 푸시 완료 → Streamlit Cloud 자동 재배포 시작")
+    except Exception as e:
+        logger.error(f"GitHub 푸시 오류: {e}")
 
 
 def is_weekday():
