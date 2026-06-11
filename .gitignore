@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# 환경
+.env
+.venv
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Streamlit 로컬 시크릿 (절대 커밋 금지)
+.streamlit/secrets.toml
+
+# 로그
+*.log
+data/scheduler.log
+
+# PPT 임시파일
+~$*
